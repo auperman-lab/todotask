@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../model/todo.dart';
 import '../constants/colors.dart';
@@ -21,7 +22,6 @@ class ToDoItem extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 20),
       child: ListTile(
         onTap: () {
-          // print('Clicked on Todo Item.');
           onToDoChanged(todo);
         },
         shape: RoundedRectangleBorder(
@@ -41,6 +41,13 @@ class ToDoItem extends StatelessWidget {
             decoration: todo.isDone ? TextDecoration.lineThrough : null,
           ),
         ),
+        subtitle: Text(
+          'Expiration Date: ${DateFormat('yyyy-MM-dd').format(todo.expirationDate!)}',
+          style: TextStyle(
+            fontSize: 14,
+            color: tdGrey,
+          ),
+        ),
         trailing: Container(
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.symmetric(vertical: 12),
@@ -55,7 +62,6 @@ class ToDoItem extends StatelessWidget {
             iconSize: 18,
             icon: Icon(Icons.delete),
             onPressed: () {
-              // print('Clicked on delete icon');
               onDeleteItem(todo.id);
             },
           ),
