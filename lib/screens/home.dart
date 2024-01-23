@@ -82,6 +82,7 @@ class _HomeState extends State<Home> {
                       '+',
                       style: TextStyle(
                         fontSize: 40,
+                        color: Colors.white
                       ),
                     ),
                     onPressed: () {
@@ -131,16 +132,18 @@ class _HomeState extends State<Home> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return AddTaskBottomSheet(
-          onAddTask: (taskName) {
-            print('Added task: $taskName');
+        return BottomSlideInput(
+          onSubmit: (taskName, taskDescription, taskDate) {
+            print('Added task: $taskName, Description: $taskDescription, Date: $taskDate');
             _addToDoItem(taskName);
-            Navigator.pop(context); // Close the BottomSheet
+            Navigator.pop(context); // Close the BottomSlideInput
           },
         );
       },
     );
   }
+
+
 
 
   void _runFilter(String enteredKeyword) {
