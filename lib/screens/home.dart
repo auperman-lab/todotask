@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../model/todo.dart';
 import '../constants/colors.dart';
+import '../widgets/addTaskOverlay.dart';
 import '../widgets/todo_item.dart';
+
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -66,63 +68,37 @@ class _HomeState extends State<Home> {
             ),
           ),
           Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(children: [
-              Expanded(
-                child: Container(
+            alignment: Alignment.bottomRight,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
                   margin: EdgeInsets.only(
                     bottom: 20,
                     right: 20,
-                    left: 20,
                   ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.grey,
-                        offset: Offset(0.0, 0.0),
-                        blurRadius: 10.0,
-                        spreadRadius: 0.0,
+                  child: ElevatedButton(
+                    child: Text(
+                      '+',
+                      style: TextStyle(
+                        fontSize: 40,
                       ),
-                    ],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextField(
-                    controller: _todoController,
-                    decoration: InputDecoration(
-                        hintText: 'Add a new todo item',
-                        border: InputBorder.none),
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(
-                  bottom: 20,
-                  right: 20,
-                ),
-                child: ElevatedButton(
-                  child: Text(
-                    '+',
-                    style: TextStyle(
-                      fontSize: 40,
+                    ),
+                    onPressed: () {
+                      _showAddTaskOverlay(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: tdBlue,
+                      minimumSize: Size(60, 60),
+                      elevation: 10,
                     ),
                   ),
-                  onPressed: () {
-                    _addToDoItem(_todoController.text);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: tdBlue,
-                    minimumSize: Size(60, 60),
-                    elevation: 10,
-                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ),
+
+
         ],
       ),
     );
@@ -149,6 +125,23 @@ class _HomeState extends State<Home> {
     });
     _todoController.clear();
   }
+
+  void _showAddTaskOverlay(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return AddTaskBottomSheet(
+          onAddTask: (taskName) {
+            print('Added task: $taskName');
+            _addToDoItem(taskName);
+            Navigator.pop(context); // Close the BottomSheet
+          },
+        );
+      },
+    );
+  }
+
 
   void _runFilter(String enteredKeyword) {
     List<ToDo> results = [];
