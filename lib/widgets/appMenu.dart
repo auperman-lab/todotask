@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/screens/tasksToDo.dart';
 
 import '../screens/completedTasksScreen.dart';
 import '../screens/home.dart';
@@ -27,7 +28,7 @@ class AppMenu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Home(), // Instantiate the Home class
+                  builder: (context) => const TaskToDo(), // Instantiate the Home class
                 ),
               );
             },
