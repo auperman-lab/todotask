@@ -4,45 +4,69 @@ import 'package:intl/intl.dart';
 import '../model/todo.dart';
 import '../constants/colors.dart';
 
-class ToDoItem extends StatelessWidget {
+class ToDoItem extends StatefulWidget {
   final ToDo todo;
-  final onToDoChanged;
-  final onDeleteItem;
+  final Function(ToDo) onDone;
+  final Function(String) onDeleteItem;
+  final Function(ToDo) onDetails;
 
   const ToDoItem({
     Key? key,
     required this.todo,
-    required this.onToDoChanged,
+    required this.onDone,
     required this.onDeleteItem,
+    required this.onDetails,
   }) : super(key: key);
 
+  @override
+  _ToDoItemState createState() => _ToDoItemState();
+}
+
+class _ToDoItemState extends State<ToDoItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 20),
       child: ListTile(
         onTap: () {
-          onToDoChanged(todo);
+          widget.onDetails(widget.todo);
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         tileColor: Colors.white,
-        leading: Icon(
-          todo.isDone ? Icons.check_box : Icons.check_box_outline_blank,
-          color: tdBlue,
+        leading: Container(
+          padding: EdgeInsets.all(0),
+          margin: EdgeInsets.symmetric(vertical: 12),
+          height: 35,
+          width: 35,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: IconButton(
+            color: Colors.blue,
+            iconSize: 18,
+            icon: Icon(
+              widget.todo.isDone ? Icons.check_box : Icons.check_box_outline_blank,
+            ),
+            onPressed: () {
+              widget.onDone(widget.todo);
+              setState(() {}); // Rebuild the widget when the state changes
+            },
+          ),
         ),
         title: Text(
-          todo.todoText!,
+          widget.todo.todoText!,
           style: TextStyle(
             fontSize: 16,
             color: tdBlack,
-            decoration: todo.isDone ? TextDecoration.lineThrough : null,
+            decoration: widget.todo.isDone ? TextDecoration.lineThrough : null,
           ),
         ),
         subtitle: Text(
-          'Expiration Date: ${DateFormat('yyyy-MM-dd').format(todo.expirationDate!)}',
+          'Expiration Date: ${DateFormat('yyyy-MM-dd').format(widget.todo.expirationDate!)}',
           style: TextStyle(
             fontSize: 14,
             color: tdGrey,
@@ -62,7 +86,7 @@ class ToDoItem extends StatelessWidget {
             iconSize: 18,
             icon: Icon(Icons.delete),
             onPressed: () {
-              onDeleteItem(todo.id);
+              widget.onDeleteItem(widget.todo.id!);
             },
           ),
         ),

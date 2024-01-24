@@ -30,6 +30,8 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.17.0
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
 
 
 

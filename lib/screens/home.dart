@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import '../model/todo.dart';
 import '../constants/colors.dart';
 import '../widgets/addTaskOverlay.dart';
+import '../widgets/todoDetailsPopup.dart';
 import '../widgets/todo_item.dart';
+import '../widgets/appMenu.dart';
 
 
 class Home extends StatefulWidget {
+  static const String routeName = "/";
+
+
   const Home({Key? key}) : super(key: key);
 
   @override
@@ -19,6 +24,7 @@ class _HomeState extends State<Home> {
   List<ToDo> _foundToDo = [];
   final _todoController = TextEditingController();
 
+
   @override
   void initState() {
     _foundToDo = todosList;
@@ -29,6 +35,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tdBGColor,
+      drawer: AppMenu(),
       appBar: _buildAppBar(),
       body: Stack(
         children: [
@@ -59,7 +66,8 @@ class _HomeState extends State<Home> {
                       for (ToDo todoo in _foundToDo.reversed)
                         ToDoItem(
                           todo: todoo,
-                          onToDoChanged: _handleToDoChange,
+                          onDone: _handleToDoChange,
+                          onDetails: _handleToDoDetails,
                           onDeleteItem: _deleteToDoItem,
                         ),
                     ],
@@ -89,27 +97,29 @@ class _HomeState extends State<Home> {
                     ),
                     child: const Text(
                       '+',
-                      style: TextStyle(
-                        fontSize: 40,
-                        color: Colors.white
-                      ),
+                      style: TextStyle(fontSize: 40, color: Colors.white),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-
-
         ],
       ),
     );
   }
 
   void _handleToDoChange(ToDo todo) {
-    setState(() {
-      todo.isDone = !todo.isDone;
-    });
+    todo.isDone = !todo.isDone;
+  }
+
+  void _handleToDoDetails(ToDo todo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TodoDetailsPopup(todo: todo);
+      },
+    );
   }
 
   void _deleteToDoItem(String id) {
@@ -119,7 +129,8 @@ class _HomeState extends State<Home> {
   }
 
   // ignore: no_leading_underscores_for_local_identifiers
-  void _addToDoItem(String title, String _description, DateTime? expirationDate) {
+  void _addToDoItem(
+      String title, String _description, DateTime? expirationDate) {
     setState(() {
       todosList.add(ToDo(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -131,7 +142,6 @@ class _HomeState extends State<Home> {
     _todoController.clear();
   }
 
-
   void _showAddTaskOverlay(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -140,7 +150,8 @@ class _HomeState extends State<Home> {
         return BottomSlideInput(
           onSubmit: (taskName, taskDescription, taskDate) {
             if (kDebugMode) {
-              print('Added task: $taskName, Description: $taskDescription, Date: $taskDate');
+              print(
+                  'Added task: $taskName, Description: $taskDescription, Date: $taskDate');
             }
             _addToDoItem(taskName, taskDescription, taskDate);
             Navigator.pop(context); // Close the BottomSlideInput
@@ -149,9 +160,6 @@ class _HomeState extends State<Home> {
       },
     );
   }
-
-
-
 
   void _runFilter(String enteredKeyword) {
     List<ToDo> results = [];
@@ -169,7 +177,6 @@ class _HomeState extends State<Home> {
       _foundToDo = results;
     });
   }
-
 
   Widget searchBox() {
     return Container(
@@ -204,19 +211,15 @@ class _HomeState extends State<Home> {
       backgroundColor: tdBGColor,
       elevation: 0,
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Icon(
-          Icons.menu,
-          color: tdBlack,
-          size: 30,
-        ),
-        SizedBox(
-          height: 40,
-          width: 40,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset('assets/images/avatar.jpeg'),
-          ),
-        ),
+
+        // SizedBox(
+        //   height: 40,
+        //   width: 40,
+        //   child: ClipRRect(
+        //     borderRadius: BorderRadius.circular(20),
+        //     child: Image.asset('assets/images/avatar.jpeg'),
+        //   ),
+        // ),
       ]),
     );
   }
