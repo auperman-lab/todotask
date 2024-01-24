@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../auth.dart';
 
@@ -46,6 +47,48 @@ class _LoginPageState extends State<LoginPage>{
     return const Text('firebase auth');
   }
 
+  Widget buttonItem(
+      String imagepath, String buttonName, double size) {
+    return InkWell(
+      child: Container(
+        width: MediaQuery.of(context).size.width - 60,
+        height: 60,
+        child: Card(
+          color: Colors.black,
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: const BorderSide(
+              width: 1,
+              color: Colors.grey,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                imagepath,
+                height: size,
+                width: size,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              Text(
+                buttonName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
   Widget _entryField(
       String title,
       TextEditingController controller){
@@ -91,6 +134,8 @@ class _LoginPageState extends State<LoginPage>{
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            buttonItem("assets/google.svg", "Continue with Google", 25),
+            SizedBox(height: 15),
             _entryField('email', _controllerEmail),
             _entryField('password', _controllerPassword),
             _errorMessage(),
