@@ -21,7 +21,7 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
     );
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
   }
@@ -61,10 +61,10 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: Colors.grey,
                     offset: Offset(0.0, -2.0),
@@ -81,41 +81,41 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
+                  const Text(
                     'ADD TASK',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'Fill out the details below to add a new task.',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Enter task name',
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Enter task description (optional)',
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () => _selectDate(context),
                     child: Text('Select Date: ${_selectedDate.toLocal()}'),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -123,7 +123,7 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
                         onPressed: () {
                           _toggleAnimation();
                         },
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -136,7 +136,7 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
                           _descriptionController.clear();
                           _toggleAnimation();
                         },
-                        child: Text('Submit'),
+                        child: const Text('Submit'),
                       ),
                     ],
                   ),

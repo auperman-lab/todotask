@@ -43,18 +43,26 @@ class _LoginPageState extends State<LoginPage>{
     }
   }
 
+  Future<void> googleSignIn() async{
+    try{
+      await Auth().googleSignIn(context);
+    } on FirebaseAuthException catch (e){
+      errorMessage = e.message;
+    }
+
+  }
+
   Widget _title(){
     return const Text('firebase auth');
   }
 
-  Widget buttonItem(
-      String imagepath, String buttonName, double size) {
+  Widget buttonItem() {
     return InkWell(
-      child: Container(
+      onTap: googleSignIn,
+      child: SizedBox(
         width: MediaQuery.of(context).size.width - 60,
         height: 60,
         child: Card(
-          color: Colors.black,
           elevation: 8,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -67,17 +75,16 @@ class _LoginPageState extends State<LoginPage>{
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
-                imagepath,
-                height: size,
-                width: size,
+                'assets/images/google.svg',
+                height: 25,
+                width: 25,
               ),
               const SizedBox(
                 width: 15,
               ),
-              Text(
-                buttonName,
-                style: const TextStyle(
-                  color: Colors.white,
+              const Text(
+                'Continue with Google',
+                style: TextStyle(
                   fontSize: 17,
                 ),
               ),
@@ -134,8 +141,10 @@ class _LoginPageState extends State<LoginPage>{
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            buttonItem("assets/google.svg", "Continue with Google", 25),
-            SizedBox(height: 15),
+            buttonItem(),
+            const SizedBox(height: 10),
+            const Text('or'),
+            const SizedBox(height: 20),
             _entryField('email', _controllerEmail),
             _entryField('password', _controllerPassword),
             _errorMessage(),
