@@ -125,8 +125,30 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _handleToDoChange(String tid) {
+  void _handleToDoChange(String tid) async {
+    CollectionReference todoCollection =
+    FirebaseFirestore.instance.collection('ToDo');
+
+    try {
+      // Fetch the document reference based on tid
+      QuerySnapshot<Object?> todoSnapshot =
+      await todoCollection.where('tid', isEqualTo: tid).get();
+
+      if (todoSnapshot.docs.isNotEmpty) {
+        DocumentSnapshot<Map<String, dynamic>> todoDoc = todoSnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>;
+        bool currentToDoState = todoDoc['toDoState'] ?? false; // Default to false if the field is not present
+
+        // Update the document with the new toDoState
+        await todoCollection.doc(todoDoc.id).update({
+          'toDoState': !currentToDoState,
+        });
+      }
+    } catch (error) {
+      print('Error updating todo state: $error');
+      // Handle the error, e.g., show a message to the user
+    }
   }
+
 
   void _handleToDoDetails(String tid) {
     showDialog(
@@ -137,9 +159,26 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _deleteToDoItem(String id) {
+  void _deleteToDoItem(String tid) async {
+    CollectionReference todoCollection =
+    FirebaseFirestore.instance.collection('ToDo');
 
+    try {
+      // Fetch the document reference based on tid
+      QuerySnapshot<Object?> todoSnapshot =
+      await todoCollection.where('tid', isEqualTo: tid).get();
+
+      if (todoSnapshot.docs.isNotEmpty) {
+        DocumentSnapshot<Map<String, dynamic>> todoDoc = todoSnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>;
+        // Delete the document
+        await todoCollection.doc(todoDoc.id).delete();
+      }
+    } catch (error) {
+      print('Error deleting todo item: $error');
+      // Handle the error, e.g., show a message to the user
+    }
   }
+
 
   // ignore: no_leading_underscores_for_local_identifiers
   void _addToDoItem(

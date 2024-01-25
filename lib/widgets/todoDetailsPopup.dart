@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoDetailsPopup extends StatelessWidget {
   final String tid;
@@ -9,42 +9,46 @@ class TodoDetailsPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('ToDo').doc(tid).get(),
+    return FutureBuilder(
+      future: _fetchTodoDetails(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const Text('Document not found');
+        } else if (!snapshot.hasData) {
+          return Text('Todo not found');
         } else {
-          Map<String, dynamic> todo = snapshot.data!.data() as Map<String, dynamic>;
+          Map<String, dynamic> todoData = snapshot.data as Map<String, dynamic>;
+
+          DateTime expirationDate =
+          (todoData['toDoDate'] as DateTime);
+
           return AlertDialog(
-            title: Text('${todo["title"]}'),
+            title: Text('${todoData['title']}'),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (todo["descriptiom"] != null && todo["descriptiom"].isNotEmpty)
+                if (todoData['descriptiom'] != null &&
+                    todoData['descriptiom'].isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text('${todo["descriptiom"]}'),
+                    child: Text('${todoData['descriptiom']}'),
                   ),
+                const Text(
+                  'Due',
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
                 Text(
-                  // Format the date using DateFormat
-                  DateFormat('yyyy-MM-dd').format((todo["toDoDate"] as Timestamp).toDate()),
+                  DateFormat('yyyy-MM-dd').format(expirationDate),
                   style: const TextStyle(
                     fontSize: 20,
                   ),
                 ),
-                const SizedBox(height: 4.0),
-                // Text(
-                //   DateFormat('yyyy-MM-dd').format(todo["toDoDate"]),
-                //   style: const TextStyle(
-                //     fontSize: 20,
-                //   ),
-                // ),
               ],
             ),
             actions: [
@@ -60,4 +64,26 @@ class TodoDetailsPopup extends StatelessWidget {
       },
     );
   }
+
+  Future<Map<String, dynamic>> _fetchTodoDetails() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('ToDo')
+        .where('tid', isEqualTo: tid)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      var todoData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+
+      // Check if expirationDate is not null before casting
+      if (todoData['toDoDate'] != null) {
+        todoData['toDoDate'] =
+            (todoData['toDoDate'] as Timestamp).toDate();
+      }
+
+      return todoData;
+    } else {
+      return Future.error('Todo not found');
+    }
+  }
+
 }

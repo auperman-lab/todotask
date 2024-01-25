@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../auth.dart';
 import '../constants/colors.dart';
 import '../widgets/addTaskOverlay.dart';
+import '../widgets/todoDetailsPopup.dart';
 import '../widgets/todo_item.dart';
 import '../widgets/appMenu.dart';
 
@@ -18,7 +19,10 @@ class TaskToDo extends StatefulWidget {
 }
 
 class _TaskToDoState extends State<TaskToDo> {
-  final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance.collection("ToDo").snapshots();
+  final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance
+      .collection("ToDo")
+      .where('toDoState', isEqualTo: false)  // Add this condition
+      .snapshots();
 
   @override
   void initState() {
@@ -119,16 +123,58 @@ class _TaskToDoState extends State<TaskToDo> {
     );
   }
 
-  void _handleToDoChange(String tid) {
+  void _handleToDoChange(String tid) async {
+    CollectionReference todoCollection =
+    FirebaseFirestore.instance.collection('ToDo');
+
+    try {
+      // Fetch the document reference based on tid
+      QuerySnapshot<Object?> todoSnapshot =
+      await todoCollection.where('tid', isEqualTo: tid).get();
+
+      if (todoSnapshot.docs.isNotEmpty) {
+        DocumentSnapshot<Map<String, dynamic>> todoDoc = todoSnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>;
+        bool currentToDoState = todoDoc['toDoState'] ?? false; // Default to false if the field is not present
+
+        // Update the document with the new toDoState
+        await todoCollection.doc(todoDoc.id).update({
+          'toDoState': !currentToDoState,
+        });
+      }
+    } catch (error) {
+      print('Error updating todo state: $error');
+      // Handle the error, e.g., show a message to the user
+    }
   }
+
 
   void _handleToDoDetails(String tid) {
-
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TodoDetailsPopup(tid: tid);
+      },
+    );
   }
 
+  void _deleteToDoItem(String tid) async {
+    CollectionReference todoCollection =
+    FirebaseFirestore.instance.collection('ToDo');
 
-  void _deleteToDoItem(String id) {
+    try {
+      // Fetch the document reference based on tid
+      QuerySnapshot<Object?> todoSnapshot =
+      await todoCollection.where('tid', isEqualTo: tid).get();
 
+      if (todoSnapshot.docs.isNotEmpty) {
+        DocumentSnapshot<Map<String, dynamic>> todoDoc = todoSnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>;
+        // Delete the document
+        await todoCollection.doc(todoDoc.id).delete();
+      }
+    } catch (error) {
+      print('Error deleting todo item: $error');
+      // Handle the error, e.g., show a message to the user
+    }
   }
 
   void _showAddTaskOverlay(BuildContext context) {
