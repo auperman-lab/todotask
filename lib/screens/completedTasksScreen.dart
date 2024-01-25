@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart' show AppBar, BorderRadius, BoxConstraints, BoxDecoration, BuildContext, Colors, Column, Container, EdgeInsets, Expanded, FontWeight, Icon, Icons, InputBorder, InputDecoration, ListView, MainAxisAlignment, Row, Scaffold, State, StatefulWidget, Text, TextEditingController, TextField, TextStyle, Widget, showDialog;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show AppBar, BorderRadius, BoxConstraints, BoxDecoration, BuildContext, Center, CircularProgressIndicator, Colors, Column, Container, EdgeInsets, Expanded, FontWeight, Icon, Icons, InputBorder, InputDecoration, ListView, MainAxisAlignment, Row, Scaffold, Stack, State, StatefulWidget, StreamBuilder, Text, TextField, TextStyle, Widget, showDialog;
 import '../constants/colors.dart';
-import '../model/todo.dart';
 import '../widgets/appMenu.dart';
 import '../widgets/todoDetailsPopup.dart';
 import '../widgets/todo_item.dart';
@@ -16,14 +16,11 @@ class CompletedTasksScreen extends StatefulWidget {
 }
 
 class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
-  final _todoController = TextEditingController();
-  final todosList = ToDo.todoList();
-  List<ToDo> _foundToDo = [];
+  final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance.collection("ToDo").snapshots();
+
 
   @override
   void initState() {
-    print("filtering rn");
-    _runFilter(_todoController.text);
     super.initState();
   }
 
@@ -33,32 +30,58 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
       backgroundColor: tdBGColor,
       drawer: const AppMenu(),
       appBar: _buildAppBar(),
-      body: Column(
+      body: Stack(
         children: [
-          searchBox(),
-          Expanded(
-            child: ListView(
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 15,
+            ),
+            child: Column(
               children: [
+                searchBox(),
                 Container(
                   margin: const EdgeInsets.only(
                     top: 50,
                     bottom: 20,
                   ),
                   child: const Text(
-                    'All Done',
+                    'Completed Tasks',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                for (ToDo todoo in _foundToDo.reversed)
-                  ToDoItem(
-                    todo: todoo,
-                    onDone: _handleToDoChange,
-                    onDetails: _handleToDoDetails,
-                    onDeleteItem: _deleteToDoItem,
+                Expanded(
+                  child: StreamBuilder(
+                    stream: _stream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      QuerySnapshot querySnapshot = snapshot.data as QuerySnapshot;
+
+                      return ListView.builder(
+                        itemCount: querySnapshot.docs.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> data = querySnapshot.docs[index].data() as Map<String, dynamic>;
+
+                          return ToDoItem(
+                            title: data["title"],
+                            description: data["descriptiom"],
+                            expirationDate: (data["toDoDate"] as Timestamp).toDate(),
+                            isDone: data["toDoState"],
+                            tid: data["tid"],
+                            onDone: _handleToDoChange,
+                            onDetails: _handleToDoDetails,
+                            onDeleteItem: _deleteToDoItem,
+                          );
+                        },
+                      );
+                    },
                   ),
+                ),
               ],
             ),
           ),
@@ -67,35 +90,24 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
     );
   }
 
-  void _handleToDoChange(ToDo todo) {
-    todo.isDone = !todo.isDone;
-    // Handle other state changes or side effects as needed
+  void _handleToDoChange(String tid) {
   }
 
-  void _handleToDoDetails(ToDo todo) {
+  void _handleToDoDetails(String tid) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return TodoDetailsPopup(todo: todo);
+        return TodoDetailsPopup(tid: tid);
       },
     );
   }
 
   void _deleteToDoItem(String id) {
-    setState(() {
-      todosList.removeWhere((item) => item.id == id);
-      _foundToDo.removeWhere((item) => item.id == id);
-    });
+
   }
 
   void _runFilter(String enteredKeyword) {
-    setState(() {
-      _foundToDo = todosList
-          .where((item) => item.isDone && item.todoText!
-          .toLowerCase()
-          .contains(enteredKeyword.toLowerCase()))
-          .toList();
-    });
+
   }
 
 
@@ -107,7 +119,6 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
-        controller: _todoController,
         onChanged: (value) {
           _runFilter(value);
         },

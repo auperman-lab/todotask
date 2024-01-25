@@ -1,49 +1,63 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../model/todo.dart';
-import '../constants/colors.dart';
 
 class TodoDetailsPopup extends StatelessWidget {
-  final ToDo todo;
+  final String tid;
 
-  const TodoDetailsPopup({Key? key, required this.todo}) : super(key: key);
+  const TodoDetailsPopup({Key? key, required this.tid}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('${todo.todoText}'),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (todo.description != null && todo.description!.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(bottom: 8.0), // Adjust the space as needed
-              child: Text('${todo.description}'),
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('ToDo').doc(tid).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Text('Document not found');
+        } else {
+          Map<String, dynamic> todo = snapshot.data!.data() as Map<String, dynamic>;
+          return AlertDialog(
+            title: Text('${todo["title"]}'),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (todo["descriptiom"] != null && todo["descriptiom"].isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text('${todo["descriptiom"]}'),
+                  ),
+                Text(
+                  // Format the date using DateFormat
+                  DateFormat('yyyy-MM-dd').format((todo["toDoDate"] as Timestamp).toDate()),
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                // Text(
+                //   DateFormat('yyyy-MM-dd').format(todo["toDoDate"]),
+                //   style: const TextStyle(
+                //     fontSize: 20,
+                //   ),
+                // ),
+              ],
             ),
-          Text(
-            'Due',
-            style: TextStyle(
-              fontSize: 16, // Same font size as the title
-            ),
-          ),
-          SizedBox(height: 4.0), // Add some space between "Due" and the date
-          Text(
-            DateFormat('yyyy-MM-dd').format(todo.expirationDate!),
-            style: TextStyle(
-              fontSize: 20, // Same font size as the title
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Close'),
-        ),
-      ],
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 }

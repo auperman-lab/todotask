@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/auth.dart';
+import 'package:uuid/uuid.dart';
 
-import '../model/todo.dart';
 import '../constants/colors.dart';
 import '../widgets/addTaskOverlay.dart';
 import '../widgets/todoDetailsPopup.dart';
@@ -20,22 +22,21 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final todosList = ToDo.todoList();
-  List<ToDo> _foundToDo = [];
-  final _todoController = TextEditingController();
+  final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance.collection("ToDo").snapshots();
+
 
 
   @override
   void initState() {
-    _foundToDo = todosList;
     super.initState();
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tdBGColor,
-      drawer: AppMenu(),
+      drawer: const AppMenu(),
       appBar: _buildAppBar(),
       body: Stack(
         children: [
@@ -47,32 +48,47 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 searchBox(),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(
-                          top: 50,
-                          bottom: 20,
-                        ),
-                        child: const Text(
-                          'All ToDos',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      for (ToDo todoo in _foundToDo.reversed)
-                        ToDoItem(
-                          todo: todoo,
-                          onDone: _handleToDoChange,
-                          onDetails: _handleToDoDetails,
-                          onDeleteItem: _deleteToDoItem,
-                        ),
-                    ],
+                Container(
+                  margin: const EdgeInsets.only(
+                    top: 50,
+                    bottom: 20,
                   ),
-                )
+                  child: const Text(
+                    'All ToDos',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder(
+                    stream: _stream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      QuerySnapshot querySnapshot = snapshot.data as QuerySnapshot;
+
+                      return ListView.builder(
+                        itemCount: querySnapshot.docs.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> data = querySnapshot.docs[index].data() as Map<String, dynamic>;
+                          return ToDoItem(
+                            title: data["title"],
+                            description: data["descriptiom"],
+                            expirationDate: (data["toDoDate"] as Timestamp).toDate(),
+                            isDone: data["toDoState"],
+                            tid: data["tid"],
+                            onDone: _handleToDoChange,
+                            onDetails: _handleToDoDetails,
+                            onDeleteItem: _deleteToDoItem,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -109,37 +125,39 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _handleToDoChange(ToDo todo) {
-    todo.isDone = !todo.isDone;
+  void _handleToDoChange(String tid) {
   }
 
-  void _handleToDoDetails(ToDo todo) {
+  void _handleToDoDetails(String tid) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return TodoDetailsPopup(todo: todo);
+        return TodoDetailsPopup(tid: tid);
       },
     );
   }
 
   void _deleteToDoItem(String id) {
-    setState(() {
-      todosList.removeWhere((item) => item.id == id);
-    });
+
   }
 
   // ignore: no_leading_underscores_for_local_identifiers
   void _addToDoItem(
-      String title, String _description, DateTime? expirationDate) {
-    setState(() {
-      todosList.add(ToDo(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        todoText: title,
-        description: _description,
-        expirationDate: expirationDate,
-      ));
+      String _title, String _description, DateTime? _expirationDate) {
+    String _uid = Auth().currentUser!.uid;
+    String _tid = Uuid().v4(); // Generate a unique ID
+
+
+    FirebaseFirestore.instance.collection("ToDo").add({
+      "title": _title,
+      "descriptiom" : _description,
+      "toDoState" : false,
+      "toDoDate" : _expirationDate,
+      "uid" : _uid,
+      "tid" : _tid
     });
-    _todoController.clear();
+
+
   }
 
   void _showAddTaskOverlay(BuildContext context) {
@@ -162,20 +180,7 @@ class _HomeState extends State<Home> {
   }
 
   void _runFilter(String enteredKeyword) {
-    List<ToDo> results = [];
-    if (enteredKeyword.isEmpty) {
-      results = todosList;
-    } else {
-      results = todosList
-          .where((item) => item.todoText!
-          .toLowerCase()
-          .contains(enteredKeyword.toLowerCase()))
-          .toList();
-    }
 
-    setState(() {
-      _foundToDo = results;
-    });
   }
 
   Widget searchBox() {
