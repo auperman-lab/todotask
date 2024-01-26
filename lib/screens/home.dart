@@ -77,7 +77,7 @@ class _HomeState extends State<Home> {
                     bottom: 20,
                   ),
                   child: const Text(
-                    'All ToDos',
+                    'My Tasks',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w500,
@@ -161,18 +161,25 @@ class _HomeState extends State<Home> {
                     bottom: 20,
                     right: 20,
                   ),
+
                   child: ElevatedButton(
                     onPressed: () {
                       _showAddTaskOverlay(context);
                     },
+
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: tdBlue,
+                      backgroundColor: tdYellow,
                       minimumSize: const Size(60, 60),
                       elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18), // Set border radius to 0 for rectangular shape
+                      ),
                     ),
                     child: const Text(
                       '+',
-                      style: TextStyle(fontSize: 40, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 40,
+                          color: tdWhite),
                     ),
                   ),
                 ),
@@ -191,7 +198,7 @@ class _HomeState extends State<Home> {
           id: 0,
           channelKey: 'basic_chanel',
           title: 'You ran out time',
-          body: 'The deadline of $title task has expired',
+          body: 'The deadline of \'$title\' task has expired',
         ),
       );
     } else {
@@ -200,7 +207,7 @@ class _HomeState extends State<Home> {
           id: 1,
           channelKey: 'basic_chanel',
           title: 'The Deadline is approaching',
-          body: 'You have $hours left until the $title task expires',
+          body: 'You have $hours hours left until the \'$title\' task expires',
         ),
       );
     }
@@ -224,9 +231,9 @@ class _HomeState extends State<Home> {
 
         // Check if there are 24 hours or 1 hour remaining
         if (hoursRemaining <= 24.0 && hoursRemaining > 23.0) {
-          _createNotification(title, '24.0');
+          _createNotification(title, '24');
         } else if (hoursRemaining <= 1.0 && hoursRemaining > 0.0) {
-          _createNotification(title, '1.0');
+          _createNotification(title, '1');
         }
       }
     });
@@ -337,7 +344,7 @@ class _HomeState extends State<Home> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: tdWhite,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(

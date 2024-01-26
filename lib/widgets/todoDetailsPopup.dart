@@ -44,7 +44,7 @@ class TodoDetailsPopup extends StatelessWidget {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  DateFormat('yyyy-MM-dd').format(expirationDate),
+                  DateFormat('hh:mm\n yyyy-MM-dd').format(expirationDate),
                   style: const TextStyle(
                     fontSize: 20,
                   ),

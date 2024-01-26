@@ -134,7 +134,7 @@ class _TaskToDoState extends State<TaskToDo> {
                     ),
                     child: const Text(
                       '+',
-                      style: TextStyle(fontSize: 40, color: Colors.white),
+                      style: TextStyle(fontSize: 40, color: tdWhite),
                     ),
                   ),
                 ),
@@ -248,7 +248,7 @@ class _TaskToDoState extends State<TaskToDo> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: tdWhite,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(

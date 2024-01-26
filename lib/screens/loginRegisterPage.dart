@@ -1,15 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_todo_app/constants/colors.dart';
 
 import '../auth.dart';
+import 'home.dart';
 
 class LoginPage extends StatefulWidget{
+  static const String routeName = "/login";
   const LoginPage({Key? key}) : super();
 
   @override
   State<LoginPage> createState() => _LoginPageState();
-
 
 
 }
@@ -21,9 +23,11 @@ class _LoginPageState extends State<LoginPage>{
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
-  Future<void> signInWithEmailAndPassword() async{
+  Future<void> signInWithEmailAndPassword(BuildContext context) async{
     try {
-      await Auth().signInWithEailAndPassword(email: _controllerEmail.text, password: _controllerPassword.text);
+      await Auth().signInWithEmailAndPassword(email: _controllerEmail.text, password: _controllerPassword.text);
+      Navigator.pushReplacementNamed(context , Home.routeName);
+
 
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -32,9 +36,11 @@ class _LoginPageState extends State<LoginPage>{
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async{
+  Future<void> createUserWithEmailAndPassword(BuildContext context) async{
     try {
-      await Auth().createuserWithEmailAndPassword(email: _controllerEmail.text, password: _controllerPassword.text);
+      await Auth().createUserWithEmailAndPassword(email: _controllerEmail.text, password: _controllerPassword.text);
+      Navigator.pushReplacementNamed(context , Home.routeName);
+
 
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -43,22 +49,28 @@ class _LoginPageState extends State<LoginPage>{
     }
   }
 
-  Future<void> googleSignIn() async{
+  Future<void> googleSignIn(BuildContext context) async{
     try{
-      await Auth().googleSignIn(context);
+      await Auth().signInWithGoogle(context);
+      Navigator.pushReplacementNamed(context , Home.routeName);
+
     } on FirebaseAuthException catch (e){
       errorMessage = e.message;
     }
 
   }
 
+
+
   Widget _title(){
-    return const Text('firebase auth');
+    return const Text('TI-225 To Do App');
   }
 
-  Widget buttonItem() {
+  Widget googleSignInButton(BuildContext context) {
     return InkWell(
-      onTap: googleSignIn,
+      onTap: () async {
+        await googleSignIn(context);
+      },
       child: SizedBox(
         width: MediaQuery.of(context).size.width - 60,
         height: 60,
@@ -83,7 +95,7 @@ class _LoginPageState extends State<LoginPage>{
                 width: 15,
               ),
               const Text(
-                'Continue with Google',
+                'Connect with Google',
                 style: TextStyle(
                   fontSize: 17,
                 ),
@@ -94,6 +106,8 @@ class _LoginPageState extends State<LoginPage>{
       ),
     );
   }
+
+
 
 
   Widget _entryField(
@@ -111,10 +125,28 @@ class _LoginPageState extends State<LoginPage>{
     return Text(errorMessage == '' ? '': 'Humm ? $errorMessage');
   }
 
-  Widget _submitButton() {
+  Widget _submitButton(BuildContext context) {
     return ElevatedButton(
-        onPressed: isLogin ? signInWithEmailAndPassword: createUserWithEmailAndPassword,
-        child: Text(isLogin ? 'Login': 'Register'));
+        style: ElevatedButton.styleFrom(
+          elevation: 5, // Set the elevation value for the shadow
+        ),
+        onPressed: isLogin ?
+            () async {
+            await signInWithEmailAndPassword(context);
+        }
+            : () async {
+            await createUserWithEmailAndPassword(context);
+        },
+        child: Text(
+            isLogin ? 'Login': 'Register',
+            style: const TextStyle(
+              color: tdBlack,
+            ),
+
+        ),
+
+
+    );
   }
 
   Widget _loginOrRegisterButton() {
@@ -124,7 +156,14 @@ class _LoginPageState extends State<LoginPage>{
             isLogin = !isLogin;
           });
         },
-        child: Text(isLogin ? 'Register instead': 'Login instead'));
+        child: Text(
+            isLogin ? 'Register instead': 'Login instead',
+            style: const TextStyle(
+            color: tdBlack,
+          ),
+        )
+
+    );
   }
 
   @override
@@ -141,14 +180,15 @@ class _LoginPageState extends State<LoginPage>{
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            buttonItem(),
+            const SizedBox(height: 10),
+            googleSignInButton(context),
             const SizedBox(height: 10),
             const Text('or'),
             const SizedBox(height: 20),
-            _entryField('email', _controllerEmail),
-            _entryField('password', _controllerPassword),
+            _entryField('Email', _controllerEmail),
+            _entryField('Password', _controllerPassword),
             _errorMessage(),
-            _submitButton(),
+            _submitButton(context),
             _loginOrRegisterButton()
           ],
         ),

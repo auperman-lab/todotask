@@ -36,7 +36,11 @@ class _ToDoItemState extends State<ToDoItem> {
   Widget build(BuildContext context) {
     Duration difference = widget.expirationDate.difference(DateTime.now());
 
-    Color subtitleColor = difference.inDays < 1 && !widget.isDone ? Colors.red : tdGrey;
+    Color subtitleColor =widget.isDone?
+                        tdGreen:
+                        difference.inDays < 1 ?
+                          Colors.red :
+                          tdGrey;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       child: ListTile(
@@ -47,18 +51,18 @@ class _ToDoItemState extends State<ToDoItem> {
           borderRadius: BorderRadius.circular(20),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        tileColor: Colors.white,
+        tileColor: tdWhite,
         leading: Container(
           padding: const EdgeInsets.all(0),
           margin: const EdgeInsets.symmetric(vertical: 12),
           height: 35,
           width: 35,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: tdWhite,
             borderRadius: BorderRadius.circular(5),
           ),
           child: IconButton(
-            color: Colors.blue,
+            color: widget.isDone ? tdGreen : tdYellow,
             iconSize: 18,
             icon: Icon(
               widget.isDone ? Icons.check_box : Icons.check_box_outline_blank,
@@ -100,7 +104,7 @@ class _ToDoItemState extends State<ToDoItem> {
             borderRadius: BorderRadius.circular(5),
           ),
           child: IconButton(
-            color: Colors.white,
+            color: tdWhite,
             iconSize: 18,
             icon: const Icon(Icons.delete),
             onPressed: () {

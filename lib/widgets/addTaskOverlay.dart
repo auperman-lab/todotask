@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/colors.dart';
+
 class BottomSlideInput extends StatefulWidget {
   final Function(String, String, DateTime) onSubmit;
 
@@ -34,7 +36,8 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDateTime(BuildContext context) async {
+    // Show date picker
     final DateTime pickedDate = (await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -42,12 +45,23 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
       lastDate: DateTime(2101),
     )) ?? _selectedDate;
 
-    if (pickedDate != null && pickedDate != _selectedDate) {
+    // Show time picker
+    final TimeOfDay pickedTime = (await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDate),
+    )) ?? TimeOfDay.fromDateTime(_selectedDate);
+
+    // Combine date and time
+    DateTime pickedDateTime = DateTime(pickedDate.year, pickedDate.month, pickedDate.day,
+        pickedTime.hour, pickedTime.minute);
+
+    if (pickedDateTime != null && pickedDateTime != _selectedDate) {
       setState(() {
-        _selectedDate = pickedDate;
+        _selectedDate = pickedDateTime;
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +77,7 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: tdWhite,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey,
@@ -112,7 +126,7 @@ class _BottomSlideInputState extends State<BottomSlideInput> with TickerProvider
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () => _selectDate(context),
+                    onPressed: () => _selectDateTime(context),
                     child: Text('Select Date: ${_selectedDate.toLocal()}'),
                   ),
                   const SizedBox(height: 20),

@@ -2,7 +2,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_todo_app/widget_tree.dart';
+import 'package:flutter_todo_app/screens/home.dart';
+import 'package:flutter_todo_app/screens/loginRegisterPage.dart';
 
 
 Future<void> main() async{
@@ -28,10 +29,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ToDo App',
-      home: const WidgetTree(),
+      routes: {
+        '/login': (context) => LoginPage(),
+        '/': (context) => Home()
+      },
 
     );
   }

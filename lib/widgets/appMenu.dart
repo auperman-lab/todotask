@@ -1,72 +1,83 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/constants/colors.dart';
 import 'package:flutter_todo_app/screens/home.dart';
 import 'package:flutter_todo_app/screens/tasksToDo.dart';
 import 'package:flutter_todo_app/screens/completedTasksScreen.dart';
 import 'package:flutter_todo_app/auth.dart';
 
+import '../screens/loginRegisterPage.dart';
+
 class AppMenu extends StatelessWidget {
   const AppMenu({Key? key});
 
-  Future<void> signOut() async {
+  Future<void> signOut(BuildContext context) async {
     await Auth().signOut();
+    Navigator.pushReplacementNamed(context , LoginPage.routeName);
   }
 
-  Widget _signOutButton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 5.0,
-            offset: const Offset(0, 2),
+  Widget _signOutButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        await signOut(context);
+      },
+
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        padding: EdgeInsets.zero, // Remove padding
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0), // Set border radius to 0 for rectangular shape
+        ),
+        minimumSize: Size(150, 50), // Set your desired width and height
+
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.exit_to_app,
+            color:tdWhite,
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Sign out',
+            style: TextStyle(
+              color: tdWhite,
+            ),
           ),
         ],
-      ),
-      child: ElevatedButton(
-        onPressed: signOut,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-        ),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.exit_to_app),
-              SizedBox(width: 8),
-              Text('Sign out'),
-            ],
-          ),
-        ),
       ),
     );
   }
 
   Widget _buildDrawerHeader(User? user) {
     return DrawerHeader(
-      decoration: BoxDecoration(
-        color: Colors.blue,
+      decoration: const BoxDecoration(
+        color: tdYellow,
       ),
       child: Row(
         children: [
           const CircleAvatar(
             radius: 30,
-            backgroundColor: Colors.white,
+            backgroundColor: tdWhite,
           ),
           SizedBox(width: 16), // Add horizontal spacing between the avatar and text
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(
-              user?.email ?? 'User Email',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),],
-          )
+          Flexible( // Use Flexible to enable text wrapping
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user?.email ?? 'User Email',
+                  style: const TextStyle(
+                    color: tdWhite,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -125,7 +136,7 @@ class AppMenu extends StatelessWidget {
               ],
             ),
           ),
-          _signOutButton(),
+          _signOutButton(context),
         ],
       ),
     );

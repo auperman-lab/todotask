@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-
 class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
@@ -18,27 +17,19 @@ class Auth {
     ],
   );
 
-
-
-  Future<void> signInWithEailAndPassword(
+  Future<void> signInWithEmailAndPassword(
       {required String email, required String password}) async {
     await _firebaseAuth.signInWithEmailAndPassword(
         email: email, password: password);
   }
 
-  Future<void> createuserWithEmailAndPassword(
+  Future<void> createUserWithEmailAndPassword(
       {required String email, required String password}) async {
     await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, password: password);
   }
 
-  // Future<void> googleSignIn(BuildContext context) async {
-  //     await _googleSignIn.signIn();
-  //
-  // }
-
-
-  Future<void> googleSignIn(BuildContext context) async {
+  Future<void> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
@@ -53,10 +44,9 @@ class Auth {
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential =
       await _firebaseAuth.signInWithCredential(credential);
 
-      User? user = userCredential.user;
+      User? user = _firebaseAuth.currentUser;
       if (user != null) {
         // The user is signed in. You can access user information using user.displayName, user.email, etc.
         print('Google Sign-In successful: ${user.displayName}');
@@ -74,8 +64,6 @@ class Auth {
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
+          _googleSignIn.signOut();
   }
-
-
-
 }
