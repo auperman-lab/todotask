@@ -19,10 +19,20 @@ class TaskToDo extends StatefulWidget {
 }
 
 class _TaskToDoState extends State<TaskToDo> {
+  String _filterKeyword = ''; // Add a variable to store the filter keyword
+
   final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance
       .collection("ToDo")
-      .where('toDoState', isEqualTo: false)  // Add this condition
-      .snapshots();
+      .where('toDoState', isEqualTo: false)
+      .where('uid', isEqualTo: Auth().currentUser?.uid)  // Add this condition
+      .orderBy('toDoDate', descending: false) // Set 'descending' to true if you want to sort in descending order
+      .snapshots()
+      .handleError((error) {
+    print('Error fetching ToDo items: $error');
+  });
+
+
+
 
   @override
   void initState() {
@@ -65,18 +75,30 @@ class _TaskToDoState extends State<TaskToDo> {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      QuerySnapshot querySnapshot = snapshot.data as QuerySnapshot;
+
+                      QuerySnapshot<Map<String, dynamic>> querySnapshot = snapshot.data as QuerySnapshot<Map<String, dynamic>>;
+
+                      // Filter ToDo items based on the keyword
+                      List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredTodos = querySnapshot.docs.where((todo) {
+                        String title = todo['title'] ?? '';
+                        String description = todo['descriptiom'] ?? '';
+
+                        // Filter based on title or description containing the keyword
+                        return title.toLowerCase().contains(_filterKeyword) || description.toLowerCase().contains(_filterKeyword);
+                      }).toList();
 
                       return ListView.builder(
-                        itemCount: querySnapshot.docs.length,
+                        itemCount: filteredTodos.length,
                         itemBuilder: (context, index) {
-                          Map<String, dynamic> data = querySnapshot.docs[index].data() as Map<String, dynamic>;
+                          Map<String, dynamic> data = filteredTodos[index].data() as Map<String, dynamic>;
 
                           return ToDoItem(
                             title: data["title"],
                             description: data["descriptiom"],
                             expirationDate: (data["toDoDate"] as Timestamp).toDate(),
-                            isDone: data["toDoState"],
+                            completedDate: data["completedDate"] != null
+                                ? (data["completedDate"] as Timestamp).toDate()
+                                : null,                            isDone: data["toDoState"],
                             tid: data["tid"],
                             onDone: _handleToDoChange,
                             onDetails: _handleToDoDetails,
@@ -85,7 +107,8 @@ class _TaskToDoState extends State<TaskToDo> {
                         },
                       );
                     },
-                  ),
+                  )
+
                 ),
               ],
             ),
@@ -215,8 +238,11 @@ class _TaskToDoState extends State<TaskToDo> {
   }
 
   void _runFilter(String enteredKeyword) {
-
+    setState(() {
+      _filterKeyword = enteredKeyword.toLowerCase(); // Convert keyword to lowercase for case-insensitive matching
+    });
   }
+
 
   Widget searchBox() {
     return Container(

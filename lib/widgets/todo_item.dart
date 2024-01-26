@@ -7,6 +7,7 @@ class ToDoItem extends StatefulWidget {
   final String title;
   final String description;
   final DateTime expirationDate;
+  final DateTime? completedDate; // Make completedDate nullable
   final bool isDone;
   final String tid;
   final Function(String) onDone;
@@ -18,6 +19,7 @@ class ToDoItem extends StatefulWidget {
     required this.title,
     required this.description,
     required this.expirationDate,
+    required this.completedDate,
     required this.tid,
     required this.isDone,
     required this.onDone,
@@ -32,6 +34,9 @@ class ToDoItem extends StatefulWidget {
 class _ToDoItemState extends State<ToDoItem> {
   @override
   Widget build(BuildContext context) {
+    Duration difference = widget.expirationDate.difference(DateTime.now());
+
+    Color subtitleColor = difference.inDays < 1 && !widget.isDone ? Colors.red : tdGrey;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       child: ListTile(
@@ -73,12 +78,18 @@ class _ToDoItemState extends State<ToDoItem> {
           ),
         ),
         subtitle: Text(
-          'Expiration Date: ${DateFormat('yyyy-MM-dd').format(widget.expirationDate)}',
-          style: const TextStyle(
+          widget.isDone
+              ? widget.completedDate != null
+              ? 'Completed Date: ${DateFormat('yyyy-MM-dd').format(widget.completedDate!)}'
+              : 'Completed Date: N/A'
+              : 'Expiration Date: ${DateFormat('yyyy-MM-dd').format(widget.expirationDate)}',
+          style: TextStyle(
             fontSize: 14,
-            color: tdGrey,
+            color: subtitleColor,
           ),
         ),
+
+
         trailing: Container(
           margin: const EdgeInsets.symmetric(vertical: 12),
           padding: const EdgeInsets.all(0),

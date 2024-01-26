@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart' show AppBar, BorderRadius, BoxConstraints, BoxDecoration, BuildContext, Center, CircularProgressIndicator, Colors, Column, Container, EdgeInsets, Expanded, FontWeight, Icon, Icons, InputBorder, InputDecoration, ListView, MainAxisAlignment, Row, Scaffold, Stack, State, StatefulWidget, StreamBuilder, Text, TextField, TextStyle, Widget, showDialog;
+import '../auth.dart';
 import '../constants/colors.dart';
 import '../widgets/appMenu.dart';
 import '../widgets/todoDetailsPopup.dart';
@@ -16,10 +17,16 @@ class CompletedTasksScreen extends StatefulWidget {
 }
 
 class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
+  String _filterKeyword = ''; // Add a variable to store the filter keyword
   final Stream<QuerySnapshot<Map<String, dynamic>>> _stream = FirebaseFirestore.instance
       .collection("ToDo")
-      .where('toDoState', isEqualTo: true)  // Add this condition
-      .snapshots();
+      .where('toDoState', isEqualTo: true)
+      .where('uid', isEqualTo: Auth().currentUser?.uid)  // Add this condition
+      .orderBy('toDoDate', descending: false) // Set 'descending' to true if you want to sort in descending order
+      .snapshots()
+      .handleError((error) {
+    print('Error fetching ToDo items: $error');
+  });
 
 
   @override
@@ -63,18 +70,30 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      QuerySnapshot querySnapshot = snapshot.data as QuerySnapshot;
+
+                      QuerySnapshot<Map<String, dynamic>> querySnapshot = snapshot.data as QuerySnapshot<Map<String, dynamic>>;
+
+                      // Filter ToDo items based on the keyword
+                      List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredTodos = querySnapshot.docs.where((todo) {
+                        String title = todo['title'] ?? '';
+                        String description = todo['descriptiom'] ?? '';
+
+                        // Filter based on title or description containing the keyword
+                        return title.toLowerCase().contains(_filterKeyword) || description.toLowerCase().contains(_filterKeyword);
+                      }).toList();
 
                       return ListView.builder(
-                        itemCount: querySnapshot.docs.length,
+                        itemCount: filteredTodos.length,
                         itemBuilder: (context, index) {
-                          Map<String, dynamic> data = querySnapshot.docs[index].data() as Map<String, dynamic>;
+                          Map<String, dynamic> data = filteredTodos[index].data() as Map<String, dynamic>;
 
                           return ToDoItem(
                             title: data["title"],
                             description: data["descriptiom"],
                             expirationDate: (data["toDoDate"] as Timestamp).toDate(),
-                            isDone: data["toDoState"],
+                            completedDate: data["completedDate"] != null
+                                ? (data["completedDate"] as Timestamp).toDate()
+                                : null,                            isDone: data["toDoState"],
                             tid: data["tid"],
                             onDone: _handleToDoChange,
                             onDetails: _handleToDoDetails,
@@ -83,7 +102,8 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
                         },
                       );
                     },
-                  ),
+                  )
+
                 ),
               ],
             ),
@@ -148,8 +168,11 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
   }
 
   void _runFilter(String enteredKeyword) {
-
+    setState(() {
+      _filterKeyword = enteredKeyword.toLowerCase(); // Convert keyword to lowercase for case-insensitive matching
+    });
   }
+
 
 
   Widget searchBox() {

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/screens/home.dart';
 import 'package:flutter_todo_app/screens/tasksToDo.dart';
 import 'package:flutter_todo_app/screens/completedTasksScreen.dart';
 import 'package:flutter_todo_app/auth.dart';
@@ -82,6 +83,19 @@ class AppMenu extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 ListTile(
+                  title: const Text('All Tasks'),
+                  leading: const Icon(Icons.list),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Home(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
                   title: const Text('Task To Do'),
                   leading: const Icon(Icons.playlist_add),
                   onTap: () {
@@ -107,6 +121,7 @@ class AppMenu extends StatelessWidget {
                     );
                   },
                 ),
+
               ],
             ),
           ),

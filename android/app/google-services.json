@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916866571683",
+    "project_id": "t-o-d-o-manager-x90y2u",
+    "storage_bucket": "t-o-d-o-manager-x90y2u.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916866571683:android:c0346697a40f15d9384e16",
+        "android_client_info": {
+          "package_name": "com.example.flutter_todo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAchddneoUTgq026LheiH7Z3mxmhBArby4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

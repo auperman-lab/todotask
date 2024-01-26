@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_todo_app/screens/home.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 
@@ -33,9 +32,42 @@ class Auth {
         email: email, password: password);
   }
 
-  Future<void> googleSignIn(BuildContext context) async {
-      await _googleSignIn.signIn();
+  // Future<void> googleSignIn(BuildContext context) async {
+  //     await _googleSignIn.signIn();
+  //
+  // }
 
+
+  Future<void> googleSignIn(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled Google Sign-In
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential =
+      await _firebaseAuth.signInWithCredential(credential);
+
+      User? user = userCredential.user;
+      if (user != null) {
+        // The user is signed in. You can access user information using user.displayName, user.email, etc.
+        print('Google Sign-In successful: ${user.displayName}');
+      } else {
+        // Handle the case where the user is null
+        print('Google Sign-In failed.');
+      }
+    } catch (error) {
+      // Handle errors
+      print('Error during Google Sign-In: $error');
+    }
   }
 
 
